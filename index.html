@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OEE Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f5ff;
+            border: 1px solid #b6e0fe;
+            border-radius: 4px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>OEE Calculator</h1>
+        <form id="oeeForm">
+            <label for="totalDays">Total Available Days</label>
+            <input type="number" id="totalDays" value="31" required>
+
+            <label for="plantOff">Plant Off Days</label>
+            <input type="number" id="plantOff" value="2" required>
+
+            <h3>Availability Losses</h3>
+            <label for="startup">Startup (hours)</label>
+            <input type="number" id="startup" value="0" required>
+
+            <label for="breakdown">Breakdown (hours)</label>
+            <input type="number" id="breakdown" value="0" required>
+
+            <label for="pm">Preventive Maintenance (hours)</label>
+            <input type="number" id="pm" value="0" required>
+
+            <label for="changeover">Changeover (hours)</label>
+            <input type="number" id="changeover" value="0" required>
+
+            <label for="toolChangeover">Tool Changeover (hours)</label>
+            <input type="number" id="toolChangeover" value="0" required>
+
+            <label for="powerFailure">Power Failure (hours)</label>
+            <input type="number" id="powerFailure" value="0" required>
+
+            <h3>Performance Losses</h3>
+            <label for="minorStoppages">Minor Stoppages (hours)</label>
+            <input type="number" id="minorStoppages" value="0" required>
+
+            <label for="adjustment">Adjustment (hours)</label>
+            <input type="number" id="adjustment" value="0" required>
+
+            <label for="idleRun">Idle Run (hours)</label>
+            <input type="number" id="idleRun" value="0" required>
+
+            <label for="speedLoss">Speed Loss (hours)</label>
+            <input type="number" id="speedLoss" value="0" required>
+
+            <label for="logistics">Logistics (hours)</label>
+            <input type="number" id="logistics" value="0" required>
+
+            <label for="rmUnavailable">Raw Material Unavailable (hours)</label>
+            <input type="number" id="rmUnavailable" value="0" required>
+
+            <label for="materialUnavailable">Material Unavailable (hours)</label>
+            <input type="number" id="materialUnavailable" value="0" required>
+
+            <label for="distributionLoss">Distribution Loss (hours)</label>
+            <input type="number" id="distributionLoss" value="0" required>
+
+            <label for="manpowerLoss">Manpower Loss (hours)</label>
+            <input type="number" id="manpowerLoss" value="0" required>
+
+            <h3>Quality Losses</h3>
+            <label for="scrap">Scrap (hours)</label>
+            <input type="number" id="scrap" value="0" required>
+
+            <label for="rework">Rework (hours)</label>
+            <input type="number" id="rework" value="0" required>
+
+            <label for="downgrade">Downgrade (hours)</label>
+            <input type="number" id="downgrade" value="0" required>
+
+            <button type="button" onclick="calculateOEE()">Calculate OEE</button>
+
+            <div id="result" class="result" style="display: none;"></div>
+        </form>
+    </div>
+
+    <script>
+        function calculateOEE() {
+            const totalDays = parseFloat(document.getElementById('totalDays').value);
+            const plantOff = parseFloat(document.getElementById('plantOff').value);
+
+            const totalHours = (totalDays - plantOff) * 24;
+
+            // Availability Losses
+            const availabilityLosses = [
+                'startup', 'breakdown', 'pm', 'changeover', 'toolChangeover', 'powerFailure'
+            ].reduce((sum, id) => sum + parseFloat(document.getElementById(id).value || 0), 0);
+
+            const availableHours = totalHours - availabilityLosses;
+            const availability = availableHours / totalHours;
+
+            // Performance Losses
+            const performanceLosses = [
+                'minorStoppages', 'adjustment', 'idleRun', 'speedLoss', 'logistics',
+                'rmUnavailable', 'materialUnavailable', 'distributionLoss', 'manpowerLoss'
+            ].reduce((sum, id) => sum + parseFloat(document.getElementById(id).value || 0), 0);
+
+            const performance = (availableHours - performanceLosses) / availableHours;
+
+            // Quality Losses
+            const qualityLosses = [
+                'scrap', 'rework', 'downgrade'
+            ].reduce((sum, id) => sum + parseFloat(document.getElementById(id).value || 0), 0);
+
+            const quality = (availableHours - qualityLosses) / availableHours;
+
+            // OEE Calculation
+            const oee = availability * performance * quality;
+
+            // Display Result
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = `OEE: ${(oee * 100).toFixed(2)}% (Availability: ${(availability * 100).toFixed(2)}%, Performance: ${(performance * 100).toFixed(2)}%, Quality: ${(quality * 100).toFixed(2)}%)`;
+        }
+    </script>
+</body>
+
+</html>
